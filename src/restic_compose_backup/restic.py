@@ -29,6 +29,16 @@ def backup_files(repository: str, source='/backup/volumes'):
         source,
     ]))
 
+def restore_files(repository: str, target='/restored_data'):
+    logger.info('Restoring files to ===> %s', target)
+    return commands.run(restic(repository, [
+        "--verbose",
+        "restore",
+        "latest",
+        "--target",
+        target
+    ]))
+
 def backup_db_file(filename: str, backup_command: str):
     """
     Stage db backup to disk and then backup from disk to restic to get around restic's lack of commulative snapshots
@@ -56,6 +66,18 @@ def backup_db_file(filename: str, backup_command: str):
     #     commands.log_std('stderr', sys.stderr, logging.ERROR)
 
     return exit_code
+def restore_db_file(filename: str, restore_command: str):
+    """
+    Restore database from backup
+    """
+    logger.info('Database restore_command: =======> %s', restore_command)
+    restore_process = subprocess.run(restore_command, shell=True)
+
+    exit_code = 0 if (restore_process.returncode == 0) else 1
+
+    logger.info('Database Restore exit code: =======> %s', exit_code)
+    return exit_code
+
 
 def backup_from_stdin(repository: str, filename: str, source_command: List[str]):
     """

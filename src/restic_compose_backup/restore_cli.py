@@ -4,7 +4,7 @@ import logging
 
 from restic_compose_backup import (
     alerts,
-    backup_runner,
+    restore_runner,
     log,
     restic,
 )
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    """CLI entrypoint"""
+    """Restore CLI entrypoint"""
     args = parse_args()
     config = Config()
     log.setup(level=args.log_level or config.log_level)
@@ -29,30 +29,21 @@ def main():
     if args.action == 'status':
         status(config, containers)
 
-    elif args.action == 'snapshots':
-        snapshots(config, containers)
+    elif args.action == 'restore':
+        restore(config, containers)
 
-    elif args.action == 'backup':
-        backup(config, containers)
-
-    elif args.action == 'start-backup-process':
-        start_backup_process(config, containers)
-
-    elif args.action == 'cleanup':
-        cleanup(config, containers)
+    elif args.action == 'start-restore-process':
+        start_restore_process(config, containers)
 
     elif args.action == 'alert':
         alert(config, containers)
 
+    elif args.action == "dump-env":
+        dump_env()
+
     elif args.action == 'version':
         import restic_compose_backup
         print(restic_compose_backup.__version__)
-
-    elif args.action == "crontab":
-        crontab(config)
-
-    elif args.action == "dump-env":
-        dump_env()
 
     # Random test stuff here
     elif args.action == "test":
@@ -65,18 +56,18 @@ def main():
 
 
 def status(config, containers):
-    """Outputs the backup config for the compose setup"""
+    """Outputs the restore config for the compose setup"""
     logger.info("Status for compose project '%s'", containers.project_name)
     logger.info("Repository: '%s'", config.repository)
-    logger.info("Backup currently running?: %s", containers.backup_process_running)
-    logger.info("Include project name in backup path?: %s", utils.is_true(config.include_project_name))
+    logger.info("Restore currently running?: %s", containers.restore_process_running)
+    logger.info("Include project name in restore path?: %s", utils.is_true(config.include_project_name))
     logger.debug("Exclude bind mounts from backups?: %s", utils.is_true(config.exclude_bind_mounts))
     logger.info("Checking docker availability")
 
     utils.list_containers()
 
-    if containers.stale_backup_process_containers:
-        utils.remove_containers(containers.stale_backup_process_containers)
+    if containers.stale_restore_process_containers:
+        utils.remove_containers(containers.stale_restore_process_containers)
 
     # Check if repository is initialized with restic snapshots
     if not restic.is_initialized(config.repository):
@@ -93,14 +84,6 @@ def status(config, containers):
     backup_containers = containers.containers_for_backup()
     for container in backup_containers:
         logger.info('service: %s', container.service_name)
-
-        if container.volume_backup_enabled:
-            for mount in container.filter_mounts():
-                logger.info(
-                    ' - volume: %s -> %s',
-                    mount.source,
-                    container.get_volume_backup_destination(mount, '/backup/volumes'),
-                )
 
         if container.database_backup_enabled:
             instance = container.instance
@@ -121,72 +104,75 @@ def status(config, containers):
     logger.info("-" * 67)
 
 
-def backup(config, containers):
-    """Request a backup to start"""
-    # Make sure we don't spawn multiple backup processes
-    if containers.backup_process_running:
+def restore(config, containers):
+    """Request a restore to start"""
+    # Make sure we don't spawn multiple restore processes
+    logger.info(f"Running:====> {containers.restore_process_running}\n")
+    if containers.restore_process_running:
         alerts.send(
-            subject="Backup process container already running",
+            subject="Restore process container already running",
             body=(
-                "A backup process container is already running. \n"
-                f"Id: {containers.backup_process_container.id}\n"
-                f"Name: {containers.backup_process_container.name}\n"
+                "A restore process container is already running. \n"
+                f"Id: {containers.restore_process_container.id}\n"
+                f"Name: {containers.restore_process_container.name}\n"
             ),
             alert_type='ERROR',
         )
-        raise RuntimeError("Backup process already running")
-
-    # Map all volumes from the backup container into the backup process container
+        logger.info(f"Id: {containers.restore_process_container.id}\n")
+        logger.info(f"Name: {containers.restore_process_container.name}\n")
+        # raise RuntimeError("Restore process already running")
+    # Map all volumes from the Restore container into the Restore process container
     volumes = containers.this_container.volumes
 
     # Map volumes from other containers we are backing up
     mounts = containers.generate_backup_mounts('/backup/volumes')
     volumes.update(mounts)
 
-    logger.debug('Starting backup container with image %s', containers.this_container.image)
+    logger.debug('Starting Restore container with image %s', containers.this_container.image)
     try:
-        result = backup_runner.run(
+        result = restore_runner.run(
             image=containers.this_container.image,
-            command='restic-compose-backup start-backup-process',
+            command='restic-compose-restore start-restore-process',
             volumes=volumes,
             environment=containers.this_container.environment,
             source_container_id=containers.this_container.id,
             labels={
-                containers.backup_process_label: 'True',
+                containers.restore_process_label: 'True',
                 "com.docker.compose.project": containers.project_name,
             },
         )
     except Exception as ex:
+        logger.info(ex)
         logger.exception(ex)
         alerts.send(
-            subject="Exception during backup",
+            subject="Exception during Restore",
             body=str(ex),
             alert_type='ERROR',
         )
         return
 
-    logger.info('Backup container exit code: %s', result)
+    logger.info('Restore container exit code: %s', result)
 
     # Alert the user if something went wrong
     if result != 0:
         alerts.send(
-            subject="Backup process exited with non-zero code",
-            body=open('backup.log').read(),
+            subject="Restore process exited with non-zero code",
+            body=open('restore.log').read(),
             alert_type='ERROR',
         )
 
 
-def start_backup_process(config, containers):
-    """The actual backup process running inside the spawned container"""
-    if not utils.is_true(os.environ.get('BACKUP_PROCESS_CONTAINER')):
+def start_restore_process(config, containers):
+    """The actual restore process running inside the spawned container"""
+    if not utils.is_true(os.environ.get('RESTORE_PROCESS_CONTAINER')):
         logger.error(
-            "Cannot run backup process in this container. Use backup command instead. "
+            "Cannot run restore process in this container. Use restore command instead. "
             "This will spawn a new container with the necessary mounts."
         )
         alerts.send(
-            subject="Cannot run backup process in this container",
+            subject="Cannot run restore process in this container",
             body=(
-                "Cannot run backup process in this container. Use backup command instead. "
+                "Cannot run restore process in this container. Use restore command instead. "
                 "This will spawn a new container with the necessary mounts."
             )
         )
@@ -195,68 +181,27 @@ def start_backup_process(config, containers):
     status(config, containers)
     errors = False
 
-    # Did we actually get any volumes mounted?
-    try:
-        has_volumes = os.stat('/backup/volumes') is not None
-    except FileNotFoundError:
-        logger.warning("Found no volumes to back up")
-        has_volumes = False
-
-    # Warn if there is nothing to do
-    if len(containers.containers_for_backup()) == 0 and not has_volumes:
-        logger.error("No containers for backup found")
-        exit(1)
-
-    # if has_volumes:
-    #     try:
-    #         logger.info('Backing up volumes')
-    #         vol_result = restic.backup_files(config.repository, source='/backup/volumes')
-    #         logger.debug('Volume backup exit code: %s', vol_result)
-    #         if vol_result != 0:
-    #             logger.error('Volume backup exited with non-zero code: %s', vol_result)
-    #             errors = True
-    #     except Exception as ex:
-    #         logger.error('Exception raised during volume backup')
-    #         logger.exception(ex)
-    #         errors = True
-
-    # prepare databases backups
-    logger.info('Backing up databases')
+    # Restore databases
+    logger.info('Restoring databases')
     for container in containers.containers_for_backup():
         if container.database_backup_enabled:
             try:
                 instance = container.instance
-                logger.info('Backing up %s in service %s', instance.container_type, instance.service_name)
-                result = instance.backup()
+                logger.info('Restoring up %s in service %s', instance.container_type, instance.service_name)
+                result = instance.restore_db()
                 logger.info('Exit code: %s', result)
                 if result != 0:
-                    logger.error('Backup command exited with non-zero code: %s', result)
+                    logger.error('Restore command exited with non-zero code: %s', result)
                     errors = True
             except Exception as ex:
                 logger.exception(ex)
                 errors = True
-
+    
     if errors:
         logger.error('Exit code: %s', errors)
         exit(1)
-    
-    # Backup Databases and Volumes
-    backup_db_result = restic.backup_files(config.repository, source='/backup/')
-    # Only run cleanup if backup was successful
-    result = cleanup(config, container)
-    logger.debug('cleanup exit code: %s', result)
-    if result != 0:
-        logger.error('cleanup exit code: %s', result)
-        exit(1)
-
-    # Test the repository for errors
-    logger.info("Checking the repository for errors")
-    result = restic.check(config.repository)
-    if result != 0:
-        logger.error('Check exit code: %s', result)
-        exit(1)
-
-    logger.info('Backup completed')
+    backup_db_result = restic.restore_files(config.repository, target='/restored_data/')
+    logger.info('Restore completed')
 
 
 def cleanup(config, containers):
@@ -309,13 +254,10 @@ def parse_args():
         'action',
         choices=[
             'status',
-            'snapshots',
-            'backup',
-            'start-backup-process',
+            'restore',
+            'start-restore-process',
             'alert',
-            'cleanup',
             'version',
-            'crontab',
             'dump-env',
             'test',
         ],

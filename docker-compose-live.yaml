@@ -1,25 +1,4 @@
-version: '3.7'
 services:
-  backup:
-    build: ./src
-    env_file:
-      - restic_compose_backup.env
-      # - alerts.env
-    # labels:
-    #   restic-compose-backup.volumes: true
-    #   restic-compose-backup.volumes.include: 'src'
-    networks:
-      - default
-      - global
-    volumes:
-      # Map in docker socket
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      # Map local restic repository for dev
-      - ./restic_data:/restic_data
-      # Map restic cache
-      - ./restic_cache:/cache
-      # Map in project source in dev
-      - ./src:/restic-compose-backup
   web:
     image: nginx
     labels:
@@ -31,6 +10,8 @@ services:
     environment:
       - SOME_VALUE=test
       - ANOTHER_VALUE=1
+    networks:
+      - default
 
   mysql5:
     image: mysql:5
@@ -43,6 +24,9 @@ services:
       - MYSQL_PASSWORD=mypassword
     volumes:
       - mysqldata5:/var/lib/mysql
+      - ./test-data/mysql-test-data.sql:/docker-entrypoint-initdb.d/classicmodels.sql
+    networks:
+      - default
 
   mysql8:
     image: mysql:8
@@ -55,6 +39,9 @@ services:
       - MYSQL_PASSWORD=mypassword
     volumes:
       - mysqldata8:/var/lib/mysql
+      - ./test-data/mysql-test-data.sql:/docker-entrypoint-initdb.d/mysql-test-data.sql
+    networks:
+      - default
 
   mariadb:
     image: mariadb:10
@@ -67,9 +54,12 @@ services:
       - MYSQL_PASSWORD=mypassword
     volumes:
       - mariadbdata:/var/lib/mysql
+      - ./test-data/mysql-test-data.sql:/docker-entrypoint-initdb.d/mysql-test-data.sql
+    networks:
+      - default
 
   postgres:
-    image: postgres:11
+    image: postgres:13
     labels:
       restic-compose-backup.postgres: true
     environment:
@@ -78,6 +68,9 @@ services:
       - POSTGRES_DB=test-postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./test-data/postgresql-test-data.sql:/docker-entrypoint-initdb.d/postgresql-test-data.sql
+    networks:
+      - default
 
 volumes:
   mysqldata5:

@@ -1,0 +1,101 @@
+services:
+  web:
+    image: nginx
+    labels:
+      restic-compose-backup.volumes: true
+      restic-compose-backup.volumes.include: "/tests"
+    volumes:
+      - ./src/tests:/srv/tests
+      - ./.vscode:/srv/code
+    environment:
+      - SOME_VALUE=test
+      - ANOTHER_VALUE=1
+    networks:
+      - default
+      - global
+
+  mysql5:
+    image: mysql:5
+    labels:
+      restic-compose-backup.mysql: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_DATABASE=mydb-5
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=mypassword
+    volumes:
+      - mysqldata5:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - default
+      - global
+
+  mysql8:
+    image: mysql:8
+    labels:
+      restic-compose-backup.mysql: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_DATABASE=mydb-8
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=mypassword
+    volumes:
+      - mysqldata8:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - default
+      - global
+
+  mariadb:
+    image: mariadb:10
+    labels:
+      restic-compose-backup.mariadb: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_DATABASE=mydb-mariadb
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=mypassword
+    volumes:
+      - mariadbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - default
+      - global
+
+  postgres:
+    image: postgres:13
+    labels:
+      restic-compose-backup.postgres: true
+    environment:
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgpassword
+      - POSTGRES_DB=test-postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: /usr/bin/pg_isready
+      interval: 5s
+      timeout: 10s
+      retries: 120
+    networks:
+      - default
+      - global
+
+volumes:
+  mysqldata5:
+  mysqldata8:
+  mariadbdata:
+  pgdata:
+
+networks:
+  global:
+    external: true

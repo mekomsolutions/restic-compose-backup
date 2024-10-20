@@ -81,6 +81,11 @@ class Container:
         return f"{enums.LABEL_BACKUP_PROCESS}-{self.project_name}"
 
     @property
+    def restore_process_label(self) -> str:
+        """str: The unique backup process label for this project"""
+        return f"{enums.LABEL_RESTORE_PROCESS}-{self.project_name}"
+
+    @property
     def project_name(self) -> str:
         """str: Name of the compose setup"""
         return self.get_label('com.docker.compose.project', default='')
@@ -176,6 +181,11 @@ class Container:
     def is_backup_process_container(self) -> bool:
         """Is this container the running backup process?"""
         return self.get_label(self.backup_process_label) == 'True'
+    
+    @property
+    def is_restore_process_container(self) -> bool:
+        """Is this container the running backup process?"""
+        return self.get_label(self.restore_process_label) == 'True'
 
     @property
     def is_running(self) -> bool:
@@ -354,7 +364,9 @@ class RunningContainers:
         self.containers = []
         self.this_container = None
         self.backup_process_container = None
+        self.restore_process_container = None
         self.stale_backup_process_containers = []
+        self.stale_restore_process_containers = []
 
         # Find the container we are running in.
         # If we don't have this information we cannot continue
@@ -375,6 +387,12 @@ class RunningContainers:
                     and container.is_backup_process_container):
                 self.stale_backup_process_containers.append(container)
 
+            # Gather stale restore process containers
+            if (self.this_container.image == container.image
+                    and not container.is_running
+                    and container.is_restore_process_container):
+                self.stale_restore_process_containers.append(container)
+
             # We only care about running containers after this point
             if not container.is_running:
                 continue
@@ -382,6 +400,10 @@ class RunningContainers:
             # Detect running backup process container
             if container.is_backup_process_container:
                 self.backup_process_container = container
+
+            # Detect running backup process container
+            if container.is_restore_process_container:
+                self.restore_process_container = container
 
             # --- Determine what containers should be evaludated
 
@@ -398,6 +420,9 @@ class RunningContainers:
             if container == self.backup_process_container:
                 continue
 
+            if container == self.restore_process_container:
+                continue
+
             self.containers.append(container)
 
     @property
@@ -409,11 +434,21 @@ class RunningContainers:
     def backup_process_label(self) -> str:
         """str: The backup process label for this project"""
         return self.this_container.backup_process_label
+    
+    @property
+    def restore_process_label(self) -> str:
+        """str: The backup process label for this project"""
+        return self.this_container.restore_process_label
 
     @property
     def backup_process_running(self) -> bool:
         """Is the backup process container running?"""
         return self.backup_process_container is not None
+
+    @property
+    def restore_process_running(self) -> bool:
+        """Is the backup process container running?"""
+        return self.restore_process_container is not None
 
     def containers_for_backup(self):
         """Obtain all containers with backup enabled"""

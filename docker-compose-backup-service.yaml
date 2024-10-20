@@ -1,0 +1,21 @@
+services:
+  backup:
+    build: ./src
+    env_file:
+      - restic_compose_backup.env
+      # - alerts.env
+    networks:
+      - default
+      - global
+    volumes:
+      # Map in docker socket
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      # Map local restic repository for dev
+      - ./restic_data:/restic_data
+      # Map restic cache
+      - ./restic_cache:/cache
+      # Map in project source in dev
+      - ./src:/restic-compose-backup
+networks:
+  global:
+    external: true

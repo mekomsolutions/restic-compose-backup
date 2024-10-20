@@ -1,0 +1,27 @@
+services:
+  restore:
+    build: 
+      context: ./src
+      dockerfile: ./restore.Dockerfile
+    env_file:
+      - restic_compose_backup.env
+    volumes:
+      - ./restored_data:/restored_data
+     ## Map local restic repository for dev
+      - ./restic_data:/restic_data
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    depends_on:
+      mysql5:
+        condition: service_healthy
+      mysql8:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - default
+      - global
+networks:
+  global:
+    external: true

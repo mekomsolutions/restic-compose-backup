@@ -16,5 +16,7 @@ setup(
     entry_points={'console_scripts': [
         'restic-compose-backup = restic_compose_backup.cli:main',
         'rcb = restic_compose_backup.cli:main',
+        'restic-compose-restore = restic_compose_backup.restore_cli:main',
+        'rcr = restic_compose_backup.restore_cli:main',
     ]},
 )

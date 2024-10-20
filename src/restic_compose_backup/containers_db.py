@@ -16,8 +16,9 @@ class MariadbContainer(Container):
 
     def get_credentials(self) -> dict:
         """dict: get credentials for the service"""
+        logger.info('Container NAME %s', self.name)
         return {
-            'host': self.hostname,
+            'host': self.name,
             'username': self.get_config_env('MYSQL_USER'),
             'password': self.get_config_env('MYSQL_PASSWORD'),
             'port': "3306",
@@ -53,6 +54,12 @@ class MariadbContainer(Container):
         creds = self.get_credentials()
         return f"mysqldump --host={creds['host']} --port={creds['port']} --user={creds['username']} --all-databases --no-tablespaces > {self.backup_destination_path()}"
 
+    def restore_command_str(self) -> str:
+        """list: create a restore command to restore database dump from restic"""
+        config = Config()
+        creds = self.get_credentials()
+        return f"restic -r {config.repository} dump latest {self.backup_destination_path()} | mysql --host={creds['host']} --port={creds['port']} --user={creds['username']}"
+
     def backup(self):
         config = Config()
         creds = self.get_credentials()
@@ -60,6 +67,15 @@ class MariadbContainer(Container):
             return restic.backup_db_file(
                 self.backup_destination_path(),
                 self.dump_command_str(),
+            )
+
+    def restore_db(self):
+        config = Config()
+        creds = self.get_credentials()
+        with utils.environment('MYSQL_PWD', creds['password']):   
+            return restic.restore_db_file(
+                self.backup_destination_path(),
+                self.restore_command_str(),
             )
 
     def backup_destination_path(self) -> str:
@@ -81,8 +97,9 @@ class MysqlContainer(Container):
 
     def get_credentials(self) -> dict:
         """dict: get credentials for the service"""
+        logger.info('Container NAME %s', self.name)
         return {
-            'host': self.hostname,
+            'host': self.name,
             'username': self.get_config_env('MYSQL_USER'),
             'password': self.get_config_env('MYSQL_PASSWORD'),
             'port': "3306",
@@ -91,7 +108,6 @@ class MysqlContainer(Container):
     def ping(self) -> bool:
         """Check the availability of the service"""
         creds = self.get_credentials()
-        logger.info('Backup=========>:MariadbContainer')
         logger.info('Backing MariaDB container %s %s', self.service_name,self.backup_destination_path())
         with utils.environment('MYSQL_PWD', creds['password']):
             return commands.ping_mysql(
@@ -116,16 +132,30 @@ class MysqlContainer(Container):
         """list: create a dump command restic and use to send data through stdin"""
         creds = self.get_credentials()
         return f"mysqldump --host={creds['host']} --port={creds['port']} --user={creds['username']} --all-databases --no-tablespaces > {self.backup_destination_path()}"
+    
+    def restore_command_str(self) -> str:
+        """list: create a restore command to restore database dump from restic"""
+        config = Config()
+        creds = self.get_credentials()
+        return f"restic -r {config.repository} dump latest {self.backup_destination_path()} | mysql --host={creds['host']} --port={creds['port']} --user={creds['username']}"
 
     def backup(self):
         config = Config()
         creds = self.get_credentials()
-        logger.info('Backup=========>:MysqlContainer')
         logger.info('Backing MySQL container %s %s', self.service_name,self.backup_destination_path())
         with utils.environment('MYSQL_PWD', creds['password']):
             return restic.backup_db_file(
                 self.backup_destination_path(),
                 self.dump_command_str(),
+            )
+
+    def restore_db(self):
+        config = Config()
+        creds = self.get_credentials()
+        with utils.environment('MYSQL_PWD', creds['password']):   
+            return restic.restore_db_file(
+                self.backup_destination_path(),
+                self.restore_command_str(),
             )
 
     def backup_destination_path(self) -> str:
@@ -147,8 +177,9 @@ class PostgresContainer(Container):
 
     def get_credentials(self) -> dict:
         """dict: get credentials for the service"""
+        logger.info('Container NAME %s', self.name)
         return {
-            'host': self.hostname,
+            'host': self.name,
             'username': self.get_config_env('POSTGRES_USER'),
             'password': self.get_config_env('POSTGRES_PASSWORD'),
             'port': "5432",
@@ -182,6 +213,12 @@ class PostgresContainer(Container):
         creds = self.get_credentials()
         return f"pg_dumpall --host={creds['host']} --port={creds['port']} --username={creds['username']} > {self.backup_destination_path()}"
 
+    def restore_command_str(self) -> str:
+        """list: create a restore command to restore database dump from restic"""
+        config = Config()
+        creds = self.get_credentials()
+        return f"restic -r {config.repository} dump latest {self.backup_destination_path()} | psql --host={creds['host']} --port={creds['port']} --username={creds['username']} --dbname=postgres"
+
     def backup(self):
         config = Config()
         creds = self.get_credentials()
@@ -190,6 +227,15 @@ class PostgresContainer(Container):
             return restic.backup_db_file(
                 self.backup_destination_path(),
                 self.dump_command_str(),
+            )
+
+    def restore_db(self):
+        config = Config()
+        creds = self.get_credentials()
+        with utils.environment('PGPASSWORD', creds['password']):   
+            return restic.restore_db_file(
+                self.backup_destination_path(),
+                self.restore_command_str(),
             )
 
     def backup_destination_path(self) -> str:

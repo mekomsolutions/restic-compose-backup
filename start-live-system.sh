@@ -1,0 +1,2 @@
+docker compose -p live-system -f docker-compose-backup-service.yaml -f docker-compose-live.yaml down -v
+docker compose -p live-system -f docker-compose-backup-service.yaml -f docker-compose-live.yaml up --build --force-recreate -d
