@@ -19,6 +19,7 @@ venv
 /private/
 restic_data/
 restic_cache/
+restore/restored
 alerts.env
 
 # build
