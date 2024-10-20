@@ -1,0 +1,8 @@
+services:
+  store:
+    build: ./
+    env_file:
+      - restic_compose_backup.env
+    volumes:
+      - ./restored:/restored
+      - /Users/emmanuelnyachoke/Code/Python/restic-compose-backup/restic_data:/restic_data

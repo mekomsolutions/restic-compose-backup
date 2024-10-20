@@ -1,0 +1,90 @@
+version: '3.7'
+services:
+  backup:
+    build: ./src
+    env_file:
+      - restic_compose_backup.env
+      # - alerts.env
+    # labels:
+    #   restic-compose-backup.volumes: true
+    #   restic-compose-backup.volumes.include: 'src'
+    networks:
+      - default
+      - global
+    volumes:
+      # Map in docker socket
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      # Map local restic repository for dev
+      - ./restic_data:/restic_data
+      # Map restic cache
+      - ./restic_cache:/cache
+      # Map in project source in dev
+      - ./src:/restic-compose-backup
+  web:
+    image: nginx
+    labels:
+      restic-compose-backup.volumes: true
+      restic-compose-backup.volumes.include: "/tests"
+    volumes:
+      - ./src/tests:/srv/tests
+      - ./.vscode:/srv/code
+    environment:
+      - SOME_VALUE=test
+      - ANOTHER_VALUE=1
+
+  mysql5:
+    image: mysql:5
+    labels:
+      restic-compose-backup.mysql: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_DATABASE=mydb-5
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=mypassword
+    volumes:
+      - mysqldata5:/var/lib/mysql
+
+  mysql8:
+    image: mysql:8
+    labels:
+      restic-compose-backup.mysql: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_DATABASE=mydb-8
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=mypassword
+    volumes:
+      - mysqldata8:/var/lib/mysql
+
+  mariadb:
+    image: mariadb:10
+    labels:
+      restic-compose-backup.mariadb: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_DATABASE=mydb-mariadb
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=mypassword
+    volumes:
+      - mariadbdata:/var/lib/mysql
+
+  postgres:
+    image: postgres:11
+    labels:
+      restic-compose-backup.postgres: true
+    environment:
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgpassword
+      - POSTGRES_DB=test-postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  mysqldata5:
+  mysqldata8:
+  mariadbdata:
+  pgdata:
+
+networks:
+  global:
+    external: true
