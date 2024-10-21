@@ -14,44 +14,6 @@ services:
       - default
       - global
 
-  mysql5:
-    image: mysql:5
-    labels:
-      restic-compose-backup.mysql: true
-    environment:
-      - MYSQL_ROOT_PASSWORD=my-secret-pw
-      - MYSQL_DATABASE=mydb-5
-      - MYSQL_USER=myuser
-      - MYSQL_PASSWORD=mypassword
-    volumes:
-      - mysqldata5:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-    networks:
-      - default
-      - global
-
-  mysql8:
-    image: mysql:8
-    labels:
-      restic-compose-backup.mysql: true
-    environment:
-      - MYSQL_ROOT_PASSWORD=my-secret-pw
-      - MYSQL_DATABASE=mydb-8
-      - MYSQL_USER=myuser
-      - MYSQL_PASSWORD=mypassword
-    volumes:
-      - mysqldata8:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-    networks:
-      - default
-      - global
-
   mariadb:
     image: mariadb:10
     labels:
@@ -91,8 +53,6 @@ services:
       - global
 
 volumes:
-  mysqldata5:
-  mysqldata8:
   mariadbdata:
   pgdata:
 

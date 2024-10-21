@@ -11,10 +11,6 @@ services:
       - ./restic_data:/restic_data
       - /var/run/docker.sock:/tmp/docker.sock:ro
     depends_on:
-      mysql5:
-        condition: service_healthy
-      mysql8:
-        condition: service_healthy
       mariadb:
         condition: service_healthy
       postgres:

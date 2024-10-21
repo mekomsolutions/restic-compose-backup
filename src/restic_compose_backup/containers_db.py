@@ -19,8 +19,8 @@ class MariadbContainer(Container):
         logger.info('Container NAME %s', self.name)
         return {
             'host': self.name,
-            'username': self.get_config_env('MYSQL_USER'),
-            'password': self.get_config_env('MYSQL_PASSWORD'),
+            'username': 'root',
+            'password': self.get_config_env('MYSQL_ROOT_PASSWORD'),
             'port': "3306",
         }
 
@@ -52,7 +52,7 @@ class MariadbContainer(Container):
     def dump_command_str(self) -> str:
         """list: create a dump command restic and use to send data through stdin"""
         creds = self.get_credentials()
-        return f"mysqldump --host={creds['host']} --port={creds['port']} --user={creds['username']} --all-databases --no-tablespaces > {self.backup_destination_path()}"
+        return f"mysqldump --host={creds['host']} --port={creds['port']} --user={creds['username']} --all-databases --no-tablespaces -r {self.backup_destination_path()}"
 
     def restore_command_str(self) -> str:
         """list: create a restore command to restore database dump from restic"""
@@ -100,8 +100,8 @@ class MysqlContainer(Container):
         logger.info('Container NAME %s', self.name)
         return {
             'host': self.name,
-            'username': self.get_config_env('MYSQL_USER'),
-            'password': self.get_config_env('MYSQL_PASSWORD'),
+            'username': 'root',
+            'password': self.get_config_env('MYSQL_ROOT_PASSWORD'),
             'port': "3306",
         }
 
@@ -131,7 +131,7 @@ class MysqlContainer(Container):
     def dump_command_str(self) -> str:
         """list: create a dump command restic and use to send data through stdin"""
         creds = self.get_credentials()
-        return f"mysqldump --host={creds['host']} --port={creds['port']} --user={creds['username']} --all-databases --no-tablespaces > {self.backup_destination_path()}"
+        return f"mysqldump --host={creds['host']} --port={creds['port']} --user={creds['username']} --all-databases --no-tablespaces -r {self.backup_destination_path()}"
     
     def restore_command_str(self) -> str:
         """list: create a restore command to restore database dump from restic"""
