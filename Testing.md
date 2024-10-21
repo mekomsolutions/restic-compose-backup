@@ -283,6 +283,10 @@ You should see logs similar to:
 
 ```
 
+Volumes are restored to
+
+```restored_data/backup/volumes```
+
 Stop backup system
 
 ```./stop-backup-system.sh```
