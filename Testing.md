@@ -1,4 +1,4 @@
-## To test
+## Testing Backup and Restore
 To test the project we need to simulate running a live system , taking it down and restoring the system. For this test we have two Docker Compose files for the system `docker-compose-live.yaml` and `docker-compose-restore-test.yaml` in a real restore scenario we will only have on Docker Compose file as we expect the restore is being done on a separate instance.  We also have separate files for Backup and Restore (`docker-compose-backup-service.yaml` and `docker-compose-restore-service.yaml`)
 Run:
 
@@ -60,7 +60,7 @@ crond 4.5 dillon's cron daemon, started with loglevel notice
 2024-10-21 03:50:07,193 - INFO: Backup container exit code: 0
 ```
 
-Check the databases
+### Validate database restore
 
 ```docker exec -it live-system-mariadb-1  bash```
 
@@ -283,6 +283,7 @@ You should see logs similar to:
 6 rows in set (0.001 sec)
 
 ```
+### Validate volume restore 
 
 We have two services to validate that volumes are restored correctly. see `web` and `web-2` in the `docker-compose-restore-test.yaml` file. When the `docker-compose-restore-service.yaml` file is used the `web` and `web-2` will wait for restore to complete before starting. The service then run ls on the restored mounts to confirm that the restore happened run;
 
