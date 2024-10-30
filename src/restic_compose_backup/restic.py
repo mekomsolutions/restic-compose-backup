@@ -8,6 +8,7 @@ from typing import List, Tuple
 from subprocess import Popen, PIPE
 import shutil
 from restic_compose_backup import commands
+from restic_compose_backup.config import config, Config
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +31,11 @@ def backup_files(repository: str, source='/backup/volumes'):
     ]))
 
 def restore_files(repository: str, target='/restored_data',mounts={}):
+    config = Config()
     restic_exit_code = commands.run(restic(repository, [
         "--verbose",
         "restore",
-        "latest",
+        config.restic_restore_snapshot,
         "--target",
         target
     ]))

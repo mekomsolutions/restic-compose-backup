@@ -16,6 +16,11 @@ us to enter the container and use the restic command directly.
 More about this value and supported backends:
 https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html
 
+RESTIC_RESTORE_SNAPSHOT
+
+Sets the restic snapshot used by the restore process Defaults to ``latest``
+
+
 RESTIC_PASSWORD
 ~~~~~~~~~~~~~~~
 

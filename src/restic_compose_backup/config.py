@@ -10,6 +10,7 @@ class Config:
         # Mandatory values
         self.repository = os.environ.get('RESTIC_REPOSITORY')
         self.password = os.environ.get('RESTIC_REPOSITORY')
+        self.restic_restore_snapshot = os.environ.get('RESTIC_RESTORE_SNAPSHOT') or 'latest'
         self.cron_schedule = os.environ.get('CRON_SCHEDULE') or self.default_crontab_schedule
         self.cron_command = os.environ.get('CRON_COMMAND') or self.default_backup_command
         self.swarm_mode = os.environ.get('SWARM_MODE') or False

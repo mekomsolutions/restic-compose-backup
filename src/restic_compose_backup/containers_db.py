@@ -57,7 +57,7 @@ class MariadbContainer(Container):
         """list: create a restore command to restore database dump from restic"""
         config = Config()
         creds = self.get_credentials()
-        return f"restic -r {config.repository} dump latest {self.backup_destination_path()} | mysql --host={creds['host']} --port={creds['port']} --user={creds['username']}"
+        return f"restic -r {config.repository} dump {config.restic_restore_snapshot} {self.backup_destination_path()} | mysql --host={creds['host']} --port={creds['port']} --user={creds['username']}"
 
     def dump_db(self):
         config = Config()
@@ -135,7 +135,7 @@ class MysqlContainer(Container):
         """list: create a restore command to restore database dump from restic"""
         config = Config()
         creds = self.get_credentials()
-        return f"restic -r {config.repository} dump latest {self.backup_destination_path()} | mysql --host={creds['host']} --port={creds['port']} --user={creds['username']}"
+        return f"restic -r {config.repository} dump {config.restic_restore_snapshot} {self.backup_destination_path()} | mysql --host={creds['host']} --port={creds['port']} --user={creds['username']}"
 
     def dump_db(self):
         config = Config()
@@ -214,7 +214,7 @@ class PostgresContainer(Container):
         """list: create a restore command to restore database dump from restic"""
         config = Config()
         creds = self.get_credentials()
-        return f"restic -r {config.repository} dump latest {self.backup_destination_path()} | psql --host={creds['host']} --port={creds['port']} --username={creds['username']} --dbname=postgres"
+        return f"restic -r {config.repository} dump {config.restic_restore_snapshot} {self.backup_destination_path()} | psql --host={creds['host']} --port={creds['port']} --username={creds['username']} --dbname=postgres"
 
     def dump_db(self):
         config = Config()
