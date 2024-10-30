@@ -1,12 +1,14 @@
 services:
   web:
-    image: nginx
+    build: 
+      context: ./src
+      dockerfile: ./testapp.Dockerfile
     labels:
       restic-compose-backup.volumes: true
       restic-compose-backup.volumes.include: "/tests"
     volumes:
-      - ./restored_firestores/src/tests:/srv/tests
-      - ./restored_firestores/.vscode:/srv/code
+      - ./restored_filestores/src/tests:/srv/tests
+      - ./restored_filestores/.vscode:/srv/code
     environment:
       - SOME_VALUE=test
       - ANOTHER_VALUE=1
@@ -15,13 +17,15 @@ services:
       - global
 
   web-2:
-    image: nginx
+    build: 
+      context: ./src
+      dockerfile: ./testapp.Dockerfile
     labels:
       restic-compose-backup.volumes: true
       restic-compose-backup.volumes.exclude: "/tests"
     volumes:
-      - ./restored_firestores/src/tests:/srv/tests
-      - ./restored_firestores/.vscode:/srv/code
+      - ./restored_filestores/src/tests:/srv/tests
+      - ./restored_filestores/.vscode:/srv/code
     environment:
       - SOME_VALUE=test
       - ANOTHER_VALUE=1

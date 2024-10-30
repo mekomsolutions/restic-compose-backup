@@ -19,7 +19,7 @@ venv
 /private/
 restic_data/
 restic_cache/
-restored_firestores
+restored_filestores
 alerts.env
 
 # build

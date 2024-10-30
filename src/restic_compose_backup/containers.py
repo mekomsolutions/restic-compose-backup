@@ -192,6 +192,11 @@ class Container:
         """bool: Is the container running?"""
         return self._state.get('Running', False)
 
+    @property
+    def is_created(self) -> bool:
+        """bool: Is container created?"""
+        return ("Status", 'created') in self._state.items()
+
     def get_config(self, name, default=None):
         """Get value from config dict"""
         return self._config.get(name, default)
@@ -393,7 +398,7 @@ class RunningContainers:
                 self.stale_restore_process_containers.append(container)
 
             # We only care about running containers after this point
-            if not container.is_running:
+            if not (container.is_running or container.is_created):
                 continue
 
             # Detect running backup process container

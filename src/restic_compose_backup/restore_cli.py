@@ -1,6 +1,7 @@
 import argparse
 import os
 import logging
+import time
 
 from restic_compose_backup import (
     alerts,
@@ -205,6 +206,7 @@ def start_restore_process(config, containers):
     mounts = containers.generate_restore_mounts('/backup/volumes')
     volume_restore_result = restic.restore_files(config.repository, target='/restored_data/',mounts=mounts)
     logger.info('Volume Restore completed %s',volume_restore_result)
+    
 
 
 def cleanup(config, containers):

@@ -284,9 +284,19 @@ You should see logs similar to:
 
 ```
 
-Volumes are restored to
+We have two services to validate that volumes are restored correctly. see `web` and `web-2` in the `docker-compose-restore-test.yaml` file. When the `docker-compose-restore-service.yaml` file is used the `web` and `web-2` will wait for restore to complete before starting. The service then run ls on the restored mounts to confirm that the restore happened run;
 
-```restored_data/backup/volumes```
+`docker logs -f restore-test-web-1`
+
+You will see the result
+
+```
+container.json
+fixtures.py
+requirements.txt
+tests.py
+
+```
 
 Stop backup system
 
