@@ -16,7 +16,6 @@ class MariadbContainer(Container):
 
     def get_credentials(self) -> dict:
         """dict: get credentials for the service"""
-        logger.info('Container NAME %s', self.name)
         return {
             'host': self.name,
             'username': 'root',
@@ -60,7 +59,7 @@ class MariadbContainer(Container):
         creds = self.get_credentials()
         return f"restic -r {config.repository} dump latest {self.backup_destination_path()} | mysql --host={creds['host']} --port={creds['port']} --user={creds['username']}"
 
-    def backup(self):
+    def dump_db(self):
         config = Config()
         creds = self.get_credentials()
         with utils.environment('MYSQL_PWD', creds['password']):   
@@ -97,7 +96,6 @@ class MysqlContainer(Container):
 
     def get_credentials(self) -> dict:
         """dict: get credentials for the service"""
-        logger.info('Container NAME %s', self.name)
         return {
             'host': self.name,
             'username': 'root',
@@ -139,7 +137,7 @@ class MysqlContainer(Container):
         creds = self.get_credentials()
         return f"restic -r {config.repository} dump latest {self.backup_destination_path()} | mysql --host={creds['host']} --port={creds['port']} --user={creds['username']}"
 
-    def backup(self):
+    def dump_db(self):
         config = Config()
         creds = self.get_credentials()
         logger.info('Backing MySQL container %s %s', self.service_name,self.backup_destination_path())
@@ -177,7 +175,6 @@ class PostgresContainer(Container):
 
     def get_credentials(self) -> dict:
         """dict: get credentials for the service"""
-        logger.info('Container NAME %s', self.name)
         return {
             'host': self.name,
             'username': self.get_config_env('POSTGRES_USER'),
@@ -219,7 +216,7 @@ class PostgresContainer(Container):
         creds = self.get_credentials()
         return f"restic -r {config.repository} dump latest {self.backup_destination_path()} | psql --host={creds['host']} --port={creds['port']} --username={creds['username']} --dbname=postgres"
 
-    def backup(self):
+    def dump_db(self):
         config = Config()
         creds = self.get_credentials()
         logger.info('Backing PostgresContainer container %s %s', self.service_name,self.backup_destination_path())

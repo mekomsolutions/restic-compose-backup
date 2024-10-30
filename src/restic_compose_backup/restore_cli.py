@@ -125,7 +125,7 @@ def restore(config, containers):
     volumes = containers.this_container.volumes
 
     # Map volumes from other containers we are backing up
-    mounts = containers.generate_backup_mounts('/backup/volumes')
+    mounts = containers.generate_restore_mounts('/backup/volumes')
     volumes.update(mounts)
 
     logger.debug('Starting Restore container with image %s', containers.this_container.image)
@@ -200,8 +200,11 @@ def start_restore_process(config, containers):
     if errors:
         logger.error('Exit code: %s', errors)
         exit(1)
-    backup_db_result = restic.restore_files(config.repository, target='/restored_data/')
-    logger.info('Restore completed')
+
+    logger.info('Restoring volumes')
+    mounts = containers.generate_restore_mounts('/backup/volumes')
+    volume_restore_result = restic.restore_files(config.repository, target='/restored_data/',mounts=mounts)
+    logger.info('Volume Restore completed %s',volume_restore_result)
 
 
 def cleanup(config, containers):

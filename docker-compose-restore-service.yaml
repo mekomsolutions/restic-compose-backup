@@ -6,7 +6,6 @@ services:
     env_file:
       - restic_compose_backup.env
     volumes:
-      - ./restored_data:/restored_data
      ## Map local restic repository for dev
       - ./restic_data:/restic_data
       - /var/run/docker.sock:/tmp/docker.sock:ro

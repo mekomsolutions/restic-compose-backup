@@ -7,6 +7,19 @@ services:
     volumes:
       - ./src/tests:/srv/tests
       - ./.vscode:/srv/code
+
+    environment:
+      - SOME_VALUE=test
+      - ANOTHER_VALUE=1
+    networks:
+      - default
+  web-2:
+    image: nginx
+    labels:
+      restic-compose-backup.volumes: true
+    volumes:
+      - ./src/tests:/srv/tests
+      - ./.vscode:/srv/code
     environment:
       - SOME_VALUE=test
       - ANOTHER_VALUE=1
@@ -45,6 +58,7 @@ services:
 volumes:
   mariadbdata:
   pgdata:
+  cache:
 
 networks:
   global:

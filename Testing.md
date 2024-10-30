@@ -1,9 +1,10 @@
 ## To test
+To test the project we need to simulate running a live system , taking it down and restoring the system. For this test we have two Docker Compose files for the system `docker-compose-live.yaml` and `docker-compose-restore-test.yaml` in a real restore scenario we will only have on Docker Compose file as we expect the restore is being done on a separate instance.  We also have separate files for Backup and Restore (`docker-compose-backup-service.yaml` and `docker-compose-restore-service.yaml`)
 Run:
 
 ```./start-live-system.sh```
 This will start the example live system;
-Wait for > 5 for the first backup to happen. You can confirm by running
+Wait for > 5 minutes for the first backup to happen. You can confirm by running
 
 `docker logs -f live-system-backup-1`
 
@@ -295,10 +296,8 @@ Stop backup system
 
 Remove Restored data:
 
-```sudo rm -rf /workspace/restic-compose-backup/restored_data/backup```
+```sudo rm -rf ./restored_data```
 
 Remove Backup Repo
 
-```sudo rm -rf /workspace/restic-compose-backup/restic_data/{data,index,keys,locks,snapshots,config}```
-
-
+```sudo rm -rf ./restic_data/```

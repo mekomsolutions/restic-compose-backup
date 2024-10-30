@@ -1,6 +1,12 @@
 
 # restic-compose-backup
 
+## Divergence Notice
+
+> This project is a fork of https://github.com/ZettaIO/restic-compose-backup/ with the intention of keeping the project up to date with the lastest [Restic](https://restic.readthedocs.io/en/latest/)  versions and introducing some divergent functionalities needed for our usecase
+> - The project changes the behavior of the backup process --> (In the original project the database and volumes were backed up in two steps leading to the files being placed  in separate snapshots. We needed both of them to be in same snapshot) .This is a workaround for this [issue](https://github.com/restic/restic/issues/4804 "https://github.com/restic/restic/issues/4804") and we may restore the original behaviour if the [issue](https://github.com/restic/restic/issues/4804 "https://github.com/restic/restic/issues/4804" ) is fixed.
+> -  The original project was missing support for restoring the backup it generated which we needed to add to make it easy to start new instances from the backup
+
 ![docs](https://readthedocs.org/projects/restic-compose-backup/badge/?version=latest)
 
 Backup using [restic] for a docker-compose setup.

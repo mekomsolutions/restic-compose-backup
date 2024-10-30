@@ -5,8 +5,23 @@ services:
       restic-compose-backup.volumes: true
       restic-compose-backup.volumes.include: "/tests"
     volumes:
-      - ./src/tests:/srv/tests
-      - ./.vscode:/srv/code
+      - ./restored_firestores/src/tests:/srv/tests
+      - ./restored_firestores/.vscode:/srv/code
+    environment:
+      - SOME_VALUE=test
+      - ANOTHER_VALUE=1
+    networks:
+      - default
+      - global
+
+  web-2:
+    image: nginx
+    labels:
+      restic-compose-backup.volumes: true
+      restic-compose-backup.volumes.exclude: "/tests"
+    volumes:
+      - ./restored_firestores/src/tests:/srv/tests
+      - ./restored_firestores/.vscode:/srv/code
     environment:
       - SOME_VALUE=test
       - ANOTHER_VALUE=1

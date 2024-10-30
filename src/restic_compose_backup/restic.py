@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import List, Tuple
 from subprocess import Popen, PIPE
+import shutil
 from restic_compose_backup import commands
 
 logger = logging.getLogger(__name__)
@@ -22,34 +23,30 @@ def init_repo(repository: str):
 
 
 def backup_files(repository: str, source='/backup/volumes'):
-    logger.info('Backup files from ===> %s', source)
     return commands.run(restic(repository, [
         "--verbose",
         "backup",
         source,
     ]))
 
-def restore_files(repository: str, target='/restored_data'):
-    logger.info('Restoring files to ===> %s', target)
-    return commands.run(restic(repository, [
+def restore_files(repository: str, target='/restored_data',mounts={}):
+    restic_exit_code = commands.run(restic(repository, [
         "--verbose",
         "restore",
         "latest",
         "--target",
         target
     ]))
+    
+    if (restic_exit_code == 0):
+        for source in mounts.values():
+            shutil.copytree(f"/restored_data{source['bind']}", source['bind'] , dirs_exist_ok=True)
+    return restic_exit_code
 
 def backup_db_file(filename: str, backup_command: str):
     """
     Stage db backup to disk and then backup from disk to restic to get around restic's lack of commulative snapshots
     """
- 
-    # mkdir_command = ['mkdir', '-p', Path(filename).parent]
-    # mkdir_process = Popen(mkdir_command, stdout=PIPE, stderr=PIPE)
-    # backup_process = Popen(backup_command, stdout=PIPE, stderr=PIPE)
-    # stdout, stderr = backup_process.communicate()
-    # logger.info('mkdir Command: =======> %s', mkdir_command) 
-    # logger.info('Backup Command: =======> %s', backup_command) 
     mkdir_process = subprocess.run(f'mkdir -p {Path(filename).parent}', shell=True)
     backup_process = subprocess.run(backup_command, shell=True)
 
@@ -70,7 +67,6 @@ def restore_db_file(filename: str, restore_command: str):
     """
     Restore database from backup
     """
-    logger.info('Database restore_command: =======> %s', restore_command)
     restore_process = subprocess.run(restore_command, shell=True)
 
     exit_code = 0 if (restore_process.returncode == 0) else 1

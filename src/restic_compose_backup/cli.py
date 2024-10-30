@@ -206,31 +206,17 @@ def start_backup_process(config, containers):
     if len(containers.containers_for_backup()) == 0 and not has_volumes:
         logger.error("No containers for backup found")
         exit(1)
-
-    # if has_volumes:
-    #     try:
-    #         logger.info('Backing up volumes')
-    #         vol_result = restic.backup_files(config.repository, source='/backup/volumes')
-    #         logger.debug('Volume backup exit code: %s', vol_result)
-    #         if vol_result != 0:
-    #             logger.error('Volume backup exited with non-zero code: %s', vol_result)
-    #             errors = True
-    #     except Exception as ex:
-    #         logger.error('Exception raised during volume backup')
-    #         logger.exception(ex)
-    #         errors = True
-
-    # prepare databases backups
+    # Prepare databases backups
     logger.info('Backing up databases')
     for container in containers.containers_for_backup():
         if container.database_backup_enabled:
             try:
                 instance = container.instance
-                logger.info('Backing up %s in service %s', instance.container_type, instance.service_name)
-                result = instance.backup()
+                logger.info('Dumping %s in service %s', instance.container_type, instance.service_name)
+                result = instance.dump_db()
                 logger.info('Exit code: %s', result)
                 if result != 0:
-                    logger.error('Backup command exited with non-zero code: %s', result)
+                    logger.error('Dump command exited with non-zero code: %s', result)
                     errors = True
             except Exception as ex:
                 logger.exception(ex)
@@ -241,7 +227,10 @@ def start_backup_process(config, containers):
         exit(1)
     
     # Backup Databases and Volumes
-    backup_db_result = restic.backup_files(config.repository, source='/backup/')
+    backup_files_result = restic.backup_files(config.repository, source='/backup/')
+    if backup_files_result != 0:
+        logger.error('File backup failed: %s', result)
+        exit(1)
     # Only run cleanup if backup was successful
     result = cleanup(config, container)
     logger.debug('cleanup exit code: %s', result)

@@ -256,7 +256,6 @@ class Container:
 
         destination /= self.service_name
         destination /= Path(utils.strip_root(mount.destination))
-
         return str(destination)
 
     def get_credentials(self) -> dict:
@@ -460,6 +459,15 @@ class RunningContainers:
         for container in self.containers_for_backup():
             if container.volume_backup_enabled:
                 mounts.update(container.volumes_for_backup(source_prefix=dest_prefix, mode='ro'))
+
+        return mounts
+
+    def generate_restore_mounts(self, dest_prefix='/volumes') -> dict:
+        """Generate mounts for backup for the entire compose setup"""
+        mounts = {}
+        for container in self.containers_for_backup():
+            if container.volume_backup_enabled:
+                mounts.update(container.volumes_for_backup(source_prefix=dest_prefix, mode='rw'))
 
         return mounts
 
