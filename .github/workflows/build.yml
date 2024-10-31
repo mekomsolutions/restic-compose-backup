@@ -7,12 +7,25 @@ on:
     types: [published]
 
 jobs:
-  docker-publish:
+  docker-publish-backup-image:
     uses: mekomsolutions/shared-github-workflow/.github/workflows/docker-build-publish.yml@main
     with:
       download-artifacts: false
       image-version: "latest"
       image-name: "restic-compose-backup"
+      context: ./src
+      dockerfile: ./src/Dockerfile
+    secrets:
+      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_REGISTRY_USERNAME }}
+      DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_REGISTRY_PASSWORD }}
+  docker-publish-restore-image:
+    uses: mekomsolutions/shared-github-workflow/.github/workflows/docker-build-publish.yml@main
+    with:
+      download-artifacts: false
+      image-version: "latest"
+      image-name: "restic-compose-backup-restore"
+      context: ./src
+      dockerfile: ./src/restore.Dockerfile
     secrets:
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_REGISTRY_USERNAME }}
       DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_REGISTRY_PASSWORD }}
