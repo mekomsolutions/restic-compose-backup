@@ -1,1 +1,1 @@
-docker compose -p live-system -f docker-compose-backup-service.yaml -f docker-compose-live.yaml down
+docker compose -p live -f docker-compose-backup-service.yaml -f docker-compose-live.yaml down

@@ -1,1 +1,1 @@
-docker compose -p restore-test -f docker-compose-live-two.yaml -f docker-compose-restore-service.yaml down
+docker compose -p live-two -f docker-compose-live-two.yaml -f docker-compose-restore-service.yaml down
