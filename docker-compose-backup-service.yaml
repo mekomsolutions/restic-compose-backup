@@ -14,8 +14,6 @@ services:
       - ./restic_data:/restic_data
       # Map restic cache
       - ./restic_cache:/cache
-      # Map in project source in dev
-      - ./src:/restic-compose-backup
 networks:
   global:
     external: true

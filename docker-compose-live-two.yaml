@@ -7,8 +7,8 @@ services:
       restic-compose-backup.volumes: true
       restic-compose-backup.volumes.include: "/tests"
     volumes:
-      - ./restored_filestores/src/tests:/srv/tests
-      - ./restored_filestores/.vscode:/srv/code
+      - ./live_two_filestores/src/tests:/srv/tests
+      - ./live_two_filestores/.vscode:/srv/code
     environment:
       - SOME_VALUE=test
       - ANOTHER_VALUE=1
@@ -24,8 +24,8 @@ services:
       restic-compose-backup.volumes: true
       restic-compose-backup.volumes.exclude: "/tests"
     volumes:
-      - ./restored_filestores/src/tests:/srv/tests
-      - ./restored_filestores/.vscode:/srv/code
+      - ./live_two_filestores/src/tests:/srv/tests
+      - ./live_two_filestores/.vscode:/srv/code
     environment:
       - SOME_VALUE=test
       - ANOTHER_VALUE=1

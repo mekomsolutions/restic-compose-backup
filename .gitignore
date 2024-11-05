@@ -19,7 +19,7 @@ venv
 /private/
 restic_data/
 restic_cache/
-restored_filestores
+live_two_filestores
 alerts.env
 
 # build

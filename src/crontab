@@ -1,2 +1,0 @@
-*/5  * * * * source /env.sh && rcb backup > /proc/1/fd/1
-

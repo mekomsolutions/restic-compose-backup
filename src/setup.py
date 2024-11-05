@@ -12,6 +12,7 @@ setup(
     ]),
     install_requires=[
         'docker~=7.1.0',
+        'croniter~=5.0.1'
     ],
     entry_points={'console_scripts': [
         'restic-compose-backup = restic_compose_backup.cli:main',

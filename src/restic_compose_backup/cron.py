@@ -1,3 +1,4 @@
+from croniter import croniter
 """
 # ┌───────────── minute (0 - 59)
 # │ ┌───────────── hour (0 - 23)
@@ -20,7 +21,7 @@ def generate_crontab(config):
     if schedule:
         schedule = schedule.strip()
         schedule = strip_quotes(schedule)
-        if not validate_schedule(schedule):
+        if not croniter.is_valid(schedule):
             schedule = config.default_crontab_schedule
     else:
         schedule = config.default_crontab_schedule

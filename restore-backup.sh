@@ -1,2 +1,0 @@
-docker compose -p restore-test -f docker-compose-restore-test.yaml -f docker-compose-restore-service.yaml down -v
-docker compose -p restore-test -f docker-compose-restore-test.yaml -f docker-compose-restore-service.yaml up --build --force-recreate -d
