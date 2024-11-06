@@ -208,7 +208,7 @@ class PostgresContainer(Container):
         """list: create a dump command restic and use to send data through stdin"""
         # NOTE: Backs up a single database from POSTGRES_DB env var
         creds = self.get_credentials()
-        return f"pg_dumpall --host={creds['host']} --port={creds['port']} --username={creds['username']} > {self.backup_destination_path()}"
+        return f"pg_dumpall --create --host={creds['host']} --port={creds['port']} --username={creds['username']} > {self.backup_destination_path()}"
 
     def restore_command_str(self) -> str:
         """list: create a restore command to restore database dump from restic"""
