@@ -161,6 +161,7 @@ def restore(config, containers):
             body=open('restore.log').read(),
             alert_type='ERROR',
         )
+    exit(result)
 
 
 def start_restore_process(config, containers):
