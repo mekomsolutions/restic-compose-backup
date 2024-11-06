@@ -17,6 +17,7 @@ services:
      ## Map local restic repository for dev
       - ./restic_data:/restic_data
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      - restored_data:/restored_data
     depends_on:
       mariadb:
         condition: service_healthy
@@ -28,3 +29,5 @@ services:
 networks:
   global:
     external: true
+volumes:
+  restored_data: ~

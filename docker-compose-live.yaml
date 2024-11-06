@@ -17,6 +17,7 @@ services:
     image: nginx
     labels:
       restic-compose-backup.volumes: true
+      restic-compose-backup.volumes.exclude: "/tests"
     volumes:
       - ./src/tests:/srv/tests
       - ./.vscode:/srv/code
