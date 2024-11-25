@@ -44,7 +44,7 @@ def restore_files(repository: str, target='/restored_data',mounts={}):
     if (restic_exit_code == 0):
         for source in mounts.values():
             src_path=f"/restored_data{source['bind']}"
-            if os.path.exists(dst_path):
+            if os.path.exists(src_path):
                 shutil.copytree(src_path, source['bind'] , dirs_exist_ok=True)
             else:
                 continue
