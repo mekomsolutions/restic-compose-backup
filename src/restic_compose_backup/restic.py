@@ -42,7 +42,11 @@ def restore_files(repository: str, target='/restored_data',mounts={}):
     
     if (restic_exit_code == 0):
         for source in mounts.values():
-            shutil.copytree(f"/restored_data{source['bind']}", source['bind'] , dirs_exist_ok=True)
+            src_path=f"/restored_data{source['bind']}"
+            if os.path.exists(dst_path):
+                shutil.copytree(src_path, source['bind'] , dirs_exist_ok=True)
+            else:
+                continue
     return restic_exit_code
 
 def backup_db_file(filename: str, backup_command: str):
