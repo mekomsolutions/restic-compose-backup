@@ -11,7 +11,7 @@ jobs:
     uses: mekomsolutions/shared-github-workflow/.github/workflows/docker-build-publish.yml@main
     with:
       download-artifacts: false
-      image-version: "0.17.1-1.0.0"
+      image-version: "latest"
       image-name: "restic-compose-backup"
       context: ./src
       dockerfile: Dockerfile
@@ -22,7 +22,7 @@ jobs:
     uses: mekomsolutions/shared-github-workflow/.github/workflows/docker-build-publish.yml@main
     with:
       download-artifacts: false
-      image-version: "0.17.1-1.0.0"
+      image-version: "latest"
       image-name: "restic-compose-backup-restore"
       context: ./src
       dockerfile: restore.Dockerfile
