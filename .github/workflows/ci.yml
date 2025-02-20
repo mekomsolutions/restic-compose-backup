@@ -1,4 +1,4 @@
-name: Build and Publish Docker Image
+name: CI
 
 on:
   push:
@@ -10,9 +10,8 @@ jobs:
   docker-publish-backup-image:
     uses: mekomsolutions/shared-github-workflow/.github/workflows/docker-build-publish.yml@main
     with:
-      download-artifacts: false
-      image-version: "latest"
       image-name: "restic-compose-backup"
+      image-version: "latest"
       context: ./src
       dockerfile: Dockerfile
     secrets:
@@ -21,9 +20,8 @@ jobs:
   docker-publish-restore-image:
     uses: mekomsolutions/shared-github-workflow/.github/workflows/docker-build-publish.yml@main
     with:
-      download-artifacts: false
-      image-version: "latest"
       image-name: "restic-compose-backup-restore"
+      image-version: "latest"
       context: ./src
       dockerfile: restore.Dockerfile
     secrets:
